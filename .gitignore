@@ -1,0 +1,15 @@
+# Ignore RStudio-specific files
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# Ignore everything inside the "input" folder
+input/**
+!input/.gitkeep
+
+# Ensure "output" folder exists but ignore its contents
+output/**
+!output/.gitkeep
+
+renv/**
