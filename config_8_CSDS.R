@@ -1,14 +1,14 @@
 EXPERIMENT = "ACCREU_CSDS" # label for your run, pick something short but descriptive without spaces and valid as part of a filename
 PREFIX = "_condor" # prefix for per-job .err, log, .lst, and .out files
-JOBS = c(1:2048)
+JOBS = c(1:100)
 HOST_REGEXP = ".*" # a regular expression to select execute hosts from the cluster
 REQUEST_MEMORY = 30000 # memory (MiB) to reserve for each job
 REQUEST_CPUS = 1 # number of hardware threads to reserve for each job
 LAUNCHER = "Rscript" # interpreter with which to launch the script
 SCRIPT = "./codes/8_CSDS.R"
 ARGUMENTS = "%1" # arguments to the script
-BUNDLE_INCLUDE_DIRS = c("input") # recursive, supports wildcards
-BUNDLE_EXCLUDE_DIRS = c("Condor", "output", ".git") # recursive, supports wildcards
+BUNDLE_INCLUDE_DIRS = c("input", "output") # recursive, supports wildcards
+BUNDLE_EXCLUDE_DIRS = c("Condor", ".git") # recursive, supports wildcards
 BUNDLE_EXCLUDE_FILES = c("*.log", "*.csv") # supports wildcards
 BUNDLE_ADDITIONAL_FILES = c() # additional files to add to root of bundle, can also use an absolute path for these
 RETAIN_BUNDLE = FALSE

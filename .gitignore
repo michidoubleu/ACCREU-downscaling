@@ -13,3 +13,7 @@ output/**
 !output/.gitkeep
 
 renv/**
+
+# Ensure "output" folder exists but ignore its contents
+Condor/**
+

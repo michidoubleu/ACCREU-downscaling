@@ -1,6 +1,3 @@
-load("./output/data_for_croppriors.RData")
-#
-#
 # shifters <- tech_shifter
 # curr.region <- curr.N
 # curr.time <- as.character("2010")

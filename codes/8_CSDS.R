@@ -1,5 +1,5 @@
 args <- commandArgs(trailingOnly = TRUE)
-JOBS <- ifelse(.Platform$GUI == "RStudio",1, as.integer(args[[1]]))
+JOBS <- ifelse(.Platform$GUI == "RStudio",45, as.integer(args[[1]]))
 dir.create("output")
 if(.Platform$GUI != "RStudio"){
   environment(.libPaths)$.lib.loc = c("renv/library/R-4.1/x86_64-w64-mingw32")
@@ -18,7 +18,7 @@ load("./output/targets_ACR_LUC_ACCREU.RData")
 load("./output/restrictions.RData")
 load("./input/MINDSTEP_XY.RData")
 load("./input/MINDSTEP_betas.RData")
-
+load("./output/data_for_croppriors.RData")
 
 X.raw <- X.raw %>% pivot_wider(names_from = variable,values_from = value) %>% pivot_longer(cols = -c(SimUID), names_to = "ks", values_to = "value") %>% na.omit()
 
@@ -27,13 +27,17 @@ updated_map <- updated_map.EU %>% mutate(SimUID=as.numeric(SimUID)) %>% ungroup(
 
 Ns <- unique(updated_map$REGION)
 Ns <- Ns[!Ns%in%c("Former_USSR", "NorthernAf")]
-scens <- unique(targets$scen)
-times <- unique(targets$time)
+scens <- unique(full.targets$scen)
+times <- unique(full.targets$time)
 
-est.grid = expand.grid(Ns = Ns, scens=scens)
+est.grid = expand.grid(Ns = as.character(Ns), scens=as.character(scens), stringsAsFactors = F)
+
 
 curr.N = est.grid$Ns[JOBS]
 curr.scen = est.grid$scens[JOBS]
+
+cat(curr.N)
+cat(curr.scen)
 
 curr.lu_levels <- updated_map %>% filter(REGION==curr.N) %>% rename("ns"="SimUID") %>%
   mutate(ns=as.character(ns)) %>% dplyr::select(-REGION) %>%
@@ -78,24 +82,11 @@ curr.SCEN1 <- substr(curr.scen,1,4)
 curr.SCEN3 <- gsub("^(.*[_])","",curr.scen)
 curr.SCEN2 <- gsub(paste0(curr.SCEN1,"_"),"",gsub(paste0("_",curr.SCEN3),"",curr.scen))
 
-
-
-
-
-
-
 ttt <- "2010"
 res.all <- data.frame()
-
-
-
-
-
-
-
 for(ttt in times){
 
-curr.targets <- targets[targets$REGION==curr.N,] %>% ungroup() %>%
+curr.targets <- full.targets[full.targets$REGION==curr.N,] %>% ungroup() %>%
   dplyr::select(-REGION) %>% filter(scen==curr.scen) %>%
   mutate(lu.from=recode(lu.from, "MngFor"="Forest", "PriFor"="Forest"),
          lu.to=recode(lu.to, "MngFor"="Forest", "PriFor"="Forest")) %>%
@@ -112,16 +103,6 @@ area.check <- curr.lu_levels %>% group_by(lu.from) %>% summarise(init.val=sum(va
 area.check <- area.check %>% left_join(curr.targets %>% group_by(lu.from)
                                        %>% summarise(target=sum(value))) %>%
   mutate(share=target/init.val)
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -167,7 +148,7 @@ if(any(pr.check==0)){
 
 priors <- as.data.frame(priors)
 priors2 <- priors
-priors2$value <- priors2$value+abs(rnorm(length(priors$value))/100)
+# priors2$value <- priors2$value+abs(rnorm(length(priors$value))/100)
 
 priors2 <- priors2 %>% mutate(value=ifelse(value>1,1,value))
 
@@ -186,10 +167,10 @@ priors3$weight[is.na(priors3$weight)] <- 0
 
 factors <- curr.targets  %>% group_by(lu.from) %>% summarise(value.t=sum(value)) %>% left_join(curr.lu_levels %>% group_by(lu.from) %>% summarise(value=sum(value))) %>% mutate(scale=value.t/value) %>% filter(scale>1) %>% dplyr::select(lu.from, scale)
 if(nrow(factors)!=0){
-  curr.targets <- curr.targets %>% left_join(factors) %>% mutate(value=ifelse(is.na(scale),value,value/(scale*1.01))) %>% dplyr::select(-scale)
+  curr.targets <- curr.targets %>% left_join(factors) %>% mutate(value=ifelse(is.na(scale),value,value/(scale*1))) %>% dplyr::select(-scale)
 }
 
-if(ttt==2040){
+
 if(nrow(priors3)!=0){
   res1 = downscale(targets = curr.targets,
                    start.areas = curr.lu_levels,
@@ -203,23 +184,6 @@ if(nrow(priors3)!=0){
                    xmat = curr.X,
                    betas = curr.betas %>% filter(ks %in% unique(curr.X$ks)) %>% mutate(ks=as.character(ks)),
                    options = downscale_control(MAX_EXP = log(.Machine$double.xmax)-200))
-}} else {
-
-  if(nrow(priors3)!=0){
-    res1 = downscale(targets = curr.targets,
-                     start.areas = curr.lu_levels,
-                     xmat = curr.X,
-                     betas = curr.betas %>% filter(ks %in% unique(curr.X$ks)) %>% mutate(ks=as.character(ks)),
-                     priors = priors3,
-                     options = downscale_control(MAX_EXP = log(.Machine$double.xmax)-200))
-  } else {
-    res1 = downscale(targets = curr.targets,
-                     start.areas = curr.lu_levels,
-                     xmat = curr.X,
-                     betas = curr.betas %>% filter(ks %in% unique(curr.X$ks)) %>% mutate(ks=as.character(ks)),
-                     options = downscale_control(MAX_EXP = log(.Machine$double.xmax)-200))
-  }
-
 }
 
 
@@ -310,4 +274,3 @@ res.all <- res.all %>% bind_rows(luc.temp)
 
 }
 save(res.all, file = "output/CSDS.RData")
-
