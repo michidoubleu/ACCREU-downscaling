@@ -6,6 +6,7 @@ scen <- files[2]
 for(scen in files){
 
   load(paste0(scen))
+  targets <- as.data.frame(targets)
   full.targets <- full.targets %>% bind_rows(targets)
 
 }
