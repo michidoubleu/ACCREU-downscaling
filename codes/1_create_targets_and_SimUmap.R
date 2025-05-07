@@ -113,7 +113,7 @@ still.missing <- sum(target_from$value)-sum(target_to$value)
 
 test <- target_from.SimUID  %>% group_by(country, LUID) %>% summarise(value=sum(value)) %>% left_join(target_to %>% group_by(country, LUID) %>% summarise(value.to=sum(value))) %>% mutate(diff=(value-value.to)/value) %>% dplyr::select(country, LUID, diff) %>% na.omit()
 
-test <- target_from.SimUID %>% left_join(test) %>% mutate(diff=ifelse(diff<0 || is.na(diff),0,diff), prot.diff=value*diff, value=value-prot.diff)
+test <- target_from.SimUID %>% left_join(test) %>% mutate(diff=ifelse(is.na(diff),0,ifelse(diff<0,0,diff)), prot.diff=value*diff, value=value-prot.diff)
 to.add <- test %>% group_by(country, LUID) %>% summarise(value=sum(prot.diff)) %>% mutate(lu.class="prot.other")
 
 target_to <- target_to %>% bind_rows(to.add)
