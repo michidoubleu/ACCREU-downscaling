@@ -1,14 +1,15 @@
 rm(list=ls())
+
+environment(.libPaths)$.lib.loc = c("renv/library/R-4.1/x86_64-w64-mingw32")
+
 library(stringr)
 library(gdxrrw)
 library(dplyr)
 library(tidyr)
 library(readr)
 library(terra)
+library(downscalr)
 
-if(.Platform$GUI != "RStudio"){
-  environment(.libPaths)$.lib.loc = c("renv/library/R-4.1/x86_64-w64-mingw32")
-}
 
 GAMSPath = c("C:/GAMS/40")
 igdx(GAMSPath)
