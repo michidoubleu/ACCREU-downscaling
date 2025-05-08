@@ -270,7 +270,7 @@ if(nrow(priors3)!=0){
 
 
 
-res.all <- res.all %>% bind_rows(luc.temp)
+res.all <- res.all %>% bind_rows(luc.temp %>% mutate(region=curr.N, scenario=curr.scen))
 
 }
 save(res.all, file = "output/CSDS.RData")
