@@ -49,4 +49,4 @@ colnames(yield) <- c("country", "LUID","altitude","slope","soil_type",
 yield <- yield %>% full_join(mapping) %>% filter(ITEM==SPECIES) %>% filter(nchar(CROPTECH)==2) %>% dplyr::select(SimUID, SPECIES, CROPTECH, value) %>% mutate(CROPSYS=paste0(SPECIES,'_', CROPTECH)) %>% dplyr::select(-SPECIES, -CROPTECH) %>% mutate(value=as.numeric(value))
 
 
-save(prices, yield, tech_shifter, simu_region, file = "./input/data_for_croppriors.RData")
+save(prices, yield, tech_shifter, simu_region, file = "./output/data_for_croppriors.RData")
